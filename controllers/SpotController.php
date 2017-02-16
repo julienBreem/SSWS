@@ -6,13 +6,41 @@ use yii\data\ActiveDataProvider;
 class SpotController extends ActiveController
 {
     public $modelClass = 'app\models\Spot';
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        // remove authentication filter
+        $auth = $behaviors['authenticator'];
+        unset($behaviors['authenticator']);
+
+        // add CORS filter
+        $behaviors['corsFilter'] = [
+            'class' => \yii\filters\Cors::className(),
+        ];
+
+        // re-add authentication filter
+        $behaviors['authenticator'] = $auth;
+        // avoid authentication on CORS-pre-flight requests (HTTP OPTIONS method)
+        $behaviors['authenticator']['except'] = ['options'];
+
+        return $behaviors;
+    }
+
     public function actionSearch()
     {
-        if (!empty($_GET)) {
+        if (!empty($_GET['query'])) {
+
             $model = new $this->modelClass;
+            $query = $model->find();
+            $query->joinWith(['city', 'country']);
+            $searchTerm = preg_replace("/[\s,;]+/",'%',$_GET['query']);
+            $query->Where(" concat(spot_name,'|',ss_cities.NAME_NO_HTML,'|',ss_countries.country_name) like '%".$searchTerm."%'");
+            //echo $query->createCommand()->rawSql;exit;
             try {
                 $provider = new ActiveDataProvider([
-                    'query' => $model->find()->where(['like','spot_name',$_GET['query']]),
+                    'query' => $query,
                     'pagination' => false
                 ]);
             } catch (Exception $ex) {

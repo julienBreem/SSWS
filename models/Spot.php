@@ -48,10 +48,10 @@ class Spot extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['spot_name', 'city_name', 'country_name', 'category', 'phone', 'web', 'checkin', 'new', 'address', 'address2', 'zip', 'state', 'stars', 'user_ID'], 'required'],
+            [['spot_name', 'city_name', 'country_name', 'category'], 'required'],
             [['spot_name', 'phone', 'web', 'address', 'address2', 'state'], 'string'],
             [['city_name', 'country_name', 'category', 'checkin', 'new', 'zip', 'stars', 'user_ID'], 'integer'],
-            [['last_spot'], 'safe'],
+            [['spot_name','city_name', 'country_name'], 'safe'],
             [['category'], 'exist', 'skipOnError' => false, 'targetClass' => Category::className(), 'targetAttribute' => ['category' => 'ID']],
             [['city_name'], 'exist', 'skipOnError' => true, 'targetClass' => City::className(), 'targetAttribute' => ['city_name' => 'ID_GEONAME']],
             [['country_name'], 'exist', 'skipOnError' => true, 'targetClass' => Country::className(), 'targetAttribute' => ['country_name' => 'ID']],
@@ -68,7 +68,7 @@ class Spot extends \yii\db\ActiveRecord
 			'address' => function ($model) {
 				return [
 					'countryName' => $model->country->country_name,
-					'cityName' => $model->state,
+					'cityName' => $model->city->NAME_NO_HTML,
 					'zipcode' => $model->zip,
 					'address1' => $model->address,
 					'address2' => $model->address2,
