@@ -3,6 +3,7 @@ namespace app\controllers;
 
 use yii\rest\ActiveController;
 use yii\data\ActiveDataProvider;
+use yii\filters\auth\HttpBearerAuth;
 class SpotController extends ActiveController
 {
     public $modelClass = 'app\models\Spot';
@@ -10,8 +11,8 @@ class SpotController extends ActiveController
     public function behaviors()
     {
         $behaviors = parent::behaviors();
-
         // remove authentication filter
+
         $auth = $behaviors['authenticator'];
         unset($behaviors['authenticator']);
 
@@ -19,11 +20,13 @@ class SpotController extends ActiveController
         $behaviors['corsFilter'] = [
             'class' => \yii\filters\Cors::className(),
         ];
-
-        // re-add authentication filter
-        $behaviors['authenticator'] = $auth;
         // avoid authentication on CORS-pre-flight requests (HTTP OPTIONS method)
         $behaviors['authenticator']['except'] = ['options'];
+        $behaviors['authenticator'] = [
+            'class' => HttpBearerAuth::className(),
+        ];
+        // re-add authentication filter
+        $behaviors['authenticator'] = $auth;
 
         return $behaviors;
     }
@@ -37,7 +40,8 @@ class SpotController extends ActiveController
             $query->joinWith(['city', 'country']);
             $searchTerm = preg_replace("/[\s,;]+/",'%',$_GET['query']);
             $query->Where(" concat(spot_name,'|',ss_cities.NAME_NO_HTML,'|',ss_countries.country_name) like '%".$searchTerm."%'");
-            //echo $query->createCommand()->rawSql;exit;
+            $query->limit(5);
+			//echo $query->createCommand()->rawSql;exit;
             try {
                 $provider = new ActiveDataProvider([
                     'query' => $query,

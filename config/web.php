@@ -8,8 +8,8 @@ $config = [
     'bootstrap' => ['log'],
     'components' => [
         'request' => [
-            // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => 'zP-2RISGDaGBFCOz0lqyntmibT7is-mY',
+            'class' => '\yii\web\Request',
+            'enableCookieValidation' => false,
 			'parsers' => [
 				'application/json' => 'yii\web\JsonParser',
 			]
@@ -19,7 +19,8 @@ $config = [
         ],
         'user' => [
             'identityClass' => 'app\models\User',
-            'enableAutoLogin' => true,
+            'enableSession' => false,
+            'loginUrl' => null,
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
