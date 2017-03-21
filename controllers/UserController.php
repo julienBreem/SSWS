@@ -5,22 +5,24 @@ use yii\data\ActiveDataProvider;
 use yii\filters\auth\HttpBearerAuth;
 
 
-class SpotController extends Controller
+class UserController extends Controller
 {
-    public $modelClass = 'app\models\Spot';
+    public $modelClass = 'app\models\User';
+/*
+   public function behaviors()
+   {
 
-    public function behaviors()
-    {
-        $behaviors = parent::behaviors();
+       $behaviors = parent::behaviors();
+       if($_SERVER['REQUEST_METHOD']!='OPTIONS'){
+           //echo $_SERVER['REQUEST_METHOD'];exit;
+           $behaviors['bearerAuth'] = [
+               'class' => HttpBearerAuth::className(),
+           ];
+       }
+       return $behaviors;
 
-        if($_SERVER['REQUEST_METHOD']!='OPTIONS'){
-            //echo $_SERVER['REQUEST_METHOD'];exit;
-            $behaviors['bearerAuth'] = [
-                'class' => HttpBearerAuth::className(),
-            ];
-        }
-        return $behaviors;
     }
+*/
     public function actionSearch()
     {
         if (!empty($_GET['query'])) {
@@ -48,6 +50,18 @@ class SpotController extends Controller
             }
         } else {
             throw new \yii\web\HttpException(400, 'There are no query string');
+        }
+    }
+
+    public function actionLogin()
+    {
+        $data = json_decode(file_get_contents('php://input'));
+        $model = \app\models\User::findIdentityByClientId($data->clientID);
+        $model->setAttribute('access_token',$data->access_token);
+        if($model->save()){
+            return $model;
+        } else {
+            throw new \yii\web\HttpException(401, 'Bad request');
         }
     }
 }
