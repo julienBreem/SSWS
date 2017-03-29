@@ -108,7 +108,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getSsIdentities()
+    public function getIdentity()
     {
         return $this->hasMany(Identity::className(), ['ss_user_id' => 'id_user']);
     }

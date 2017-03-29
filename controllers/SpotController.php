@@ -1,9 +1,10 @@
 <?php
 namespace app\controllers;
 
+use app\models\AddressComponentTypes;
 use yii\data\ActiveDataProvider;
 use yii\filters\auth\HttpBearerAuth;
-
+use Yii;
 
 class SpotController extends Controller
 {
@@ -21,15 +22,23 @@ class SpotController extends Controller
         }
         return $behaviors;
     }
+
+    public function actions()
+    {
+        $actions = parent::actions();
+        unset($actions['create']);
+        return $actions;
+    }
+
     public function actionSearch()
     {
         if (!empty($_GET['query'])) {
 
             $model = new $this->modelClass;
             $query = $model->find();
-            $query->joinWith(['city', 'country']);
+            $query->joinWith(['addressComponent', 'country']);
             $searchTerm = preg_replace("/[\s,;]+/",'%',$_GET['query']);
-            $query->Where(" concat(spot_name,'|',ss_cities.NAME_NO_HTML,'|',ss_countries.country_name) like '%".$searchTerm."%'");
+            $query->Where(" concat(name,'|',ss_address_component.long_name,'|',ss_countries.country_name) like '%".$searchTerm."%'");
             $query->limit(5);
             //echo $query->createCommand()->rawSql;exit;
             try {
@@ -48,6 +57,43 @@ class SpotController extends Controller
             }
         } else {
             throw new \yii\web\HttpException(400, 'There are no query string');
+        }
+    }
+
+    public function actionCreate()
+    {
+        $data = json_decode(file_get_contents('php://input'));
+        $model = new $this->modelClass();
+        foreach($data as $key => $value){
+            if($model->hasAttribute($key))$model->setAttribute($key,$value);
+        }
+        $transaction = Yii::$app->db->beginTransaction();
+        if($model->save()){
+            foreach($data->addressComponent as $component){
+                if(!\app\models\AddressComponentTypes::find()->where([ 'name' => $component->type])->exists()){
+                    $type = new \app\models\AddressComponentTypes();
+                    $type->name = $component->type;
+                    $type->save();
+                } else{
+                    $type = \app\models\AddressComponentTypes::find()->where([ 'name' => $component->type])->one();
+                }
+                $addressComponent = new \app\models\AddressComponent();
+                $addressComponent->long_name = $component->long_name;
+                $addressComponent->short_name = $component->short_name;
+                $addressComponent->type = $type->getPrimaryKey();
+                $addressComponent->spots_id = $model->ss_spots_id;
+                if(!$addressComponent->save()){
+                    $transaction->rollBack();
+                    return $addressComponent->getErrors();
+
+                }
+            }
+            $transaction->commit();
+            return $model;
+        } else {
+            $transaction->rollBack();
+            return $model->getErrors();
+
         }
     }
 }

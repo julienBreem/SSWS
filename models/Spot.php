@@ -5,32 +5,21 @@ namespace app\models;
 use Yii;
 
 /**
- * This is the model class for table "tbl_spots".
+ * This is the model class for table "ss_spots".
  *
- * @property integer $SPOT_ID
- * @property string $spot_name
- * @property integer $city_name
- * @property integer $country_name
- * @property integer $category
- * @property string $phone
- * @property string $web
- * @property integer $checkin
- * @property string $last_spot
- * @property integer $new
- * @property string $address
- * @property string $address2
- * @property integer $zip
- * @property string $state
- * @property integer $stars
- * @property integer $user_ID
+ * @property integer $ss_spots_id
+ * @property string $ss_country_code
+ * @property string $place_id
+ * @property string $lat
+ * @property string $lng
+ * @property string $name
+ * @property string $url
+ * @property string $international_phone_number
  *
- * @property SsMySpots[] $ssMySpots
- * @property SsReport[] $ssReports
- * @property SsTags[] $ssTags
- * @property SsUserSpotsbook[] $ssUserSpotsbooks
- * @property SsCategory $category0
- * @property SsCities $cityName
- * @property SsCountries $countryName
+ * @property SsAddressComponent[] $ssAddressComponents
+ * @property SsCategorySpots[] $ssCategorySpots
+ * @property SsCategory[] $categories
+ * @property SsCountries $ssCountryCode
  */
 class Spot extends \yii\db\ActiveRecord
 {
@@ -39,7 +28,7 @@ class Spot extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'tbl_spots';
+        return 'ss_spots';
     }
 
     /**
@@ -48,85 +37,64 @@ class Spot extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['spot_name', 'city_name', 'country_name', 'category'], 'required'],
-            [['spot_name', 'phone', 'web', 'address', 'address2', 'state'], 'string'],
-            [['city_name', 'country_name', 'category', 'checkin', 'new', 'zip', 'stars', 'user_ID'], 'integer'],
-            [['spot_name','city_name', 'country_name'], 'safe'],
-            [['category'], 'exist', 'skipOnError' => false, 'targetClass' => Category::className(), 'targetAttribute' => ['category' => 'ID']],
-            [['city_name'], 'exist', 'skipOnError' => true, 'targetClass' => City::className(), 'targetAttribute' => ['city_name' => 'ID_GEONAME']],
-            [['country_name'], 'exist', 'skipOnError' => true, 'targetClass' => Country::className(), 'targetAttribute' => ['country_name' => 'ID']],
+            [['ss_country_code', 'lat', 'lng', 'name'], 'required'],
+            [['ss_country_code'], 'string', 'max' => 2],
+            [['place_id', 'name'], 'string', 'max' => 100],
+            [['lat', 'lng'], 'double'],
+            [['url'], 'string', 'max' => 255],
+            [['international_phone_number'], 'string', 'max' => 50],
+            [['ss_country_code'], 'exist', 'skipOnError' => true, 'targetClass' => Country::className(), 'targetAttribute' => ['ss_country_code' => 'COUNTRY_CODE']],
         ];
     }
-	
-	public function fields()
-	{
-		return[
-			'ss_id' => 'SPOT_ID',
-			'international_phone_number' => 'phone',
-			'name' => 'spot_name',
-			'scope' => function(){ return 'SharingSpot'; },
-			'address' => function ($model) {
-				return [
-					'countryName' => $model->country->country_name,
-					'cityName' => $model->city->NAME_NO_HTML,
-					'zipcode' => $model->zip,
-					'address1' => $model->address,
-					'address2' => $model->address2,
-				];
-			},
-			
-			'website' => 'web',
-			'types' => function($model){ return [$model->types->category_name]; },
-			
-		];
-	}
 
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        return [
+            'ss_spots_id' => 'Ss Spots ID',
+            'ss_country_code' => 'Ss Country Code',
+            'place_id' => 'Place ID',
+            'lat' => 'Lat',
+            'lng' => 'Lng',
+            'name' => 'Name',
+            'url' => 'Url',
+            'international_phone_number' => 'International Phone Number',
+        ];
+    }
+    public function fields()
+    {
+        return[
+            'ss_spots_id' => 'ss_spots_id',
+            'ss_country_code' => 'ss_country_code',
+            'place_id' => 'place_id',
+            'place_id' => 'place_id',
+            'lat' => 'lat',
+            'lng' => 'lng',
+            'name' => 'name',
+            'url' => 'url',
+            'addressComponent' => function($model){ return [$model->addressComponents]; },
+            'countryName' => function($model){ return [$model->country->country_name]; },
+            'types' => function($model){ return [$model->categories]; },
+            'photos' => function($model){ return []; },
+        ];
+    }
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getSsMySpots()
+    public function getAddressComponents()
     {
-        return $this->hasMany(SsMySpots::className(), ['SPOT_ID' => 'SPOT_ID']);
+        return $this->hasMany(AddressComponent::className(), ['spots_id' => 'ss_spots_id']);
     }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getSsReports()
-    {
-        return $this->hasMany(SsReport::className(), ['spot_ID' => 'SPOT_ID']);
-    }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getSsTags()
+    public function getCategories()
     {
-        return $this->hasMany(SsTags::className(), ['SPOT_ID' => 'SPOT_ID']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getSsUserSpotsbooks()
-    {
-        return $this->hasMany(SsUserSpotsbook::className(), ['spot_name' => 'SPOT_ID']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getTypes()
-    {
-        return $this->hasOne(Category::className(), ['ID' => 'category']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getCity()
-    {
-        return $this->hasOne(City::className(), ['ID_GEONAME' => 'city_name']);
+        return $this->hasMany(Category::className(), ['ID' => 'category_id'])->viaTable('ss_category_spots', ['spots_id' => 'ss_spots_id']);
     }
 
     /**
@@ -134,6 +102,6 @@ class Spot extends \yii\db\ActiveRecord
      */
     public function getCountry()
     {
-        return $this->hasOne(Country::className(), ['ID' => 'country_name']);
+        return $this->hasOne(Country::className(), ['COUNTRY_CODE' => 'ss_country_code']);
     }
 }

@@ -59,19 +59,4 @@ class Country extends \yii\db\ActiveRecord
         ];
     }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getTblSpots()
-    {
-        return $this->hasMany(TblSpots::className(), ['country_name' => 'ID']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getTblUsers()
-    {
-        return $this->hasMany(TblUsers::className(), ['country_name' => 'ID']);
-    }
 }
