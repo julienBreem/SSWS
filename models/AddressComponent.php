@@ -60,7 +60,7 @@ class AddressComponent extends \yii\db\ActiveRecord
             'id' => 'ss_address_component_id',
             'long_name' => 'long_name',
             'short_name' => 'short_name',
-            'type' => function($model){ return [$model->componentType->name]; },
+            'type' => function($model){ return $model->componentType->name; },
         ];
     }
     /**

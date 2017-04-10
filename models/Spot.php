@@ -74,10 +74,23 @@ class Spot extends \yii\db\ActiveRecord
             'lng' => 'lng',
             'name' => 'name',
             'url' => 'url',
-            'addressComponent' => function($model){ return [$model->addressComponents]; },
-            'countryName' => function($model){ return [$model->country->country_name]; },
-            'types' => function($model){ return [$model->categories]; },
-            'photos' => function($model){ return []; },
+            'scope' => function(){ return "sharingSpots"; },
+            'spotted' => function($model){
+                return $model->spotted;
+            },
+            'planned' => function($model){
+                return $model->planned;
+            },
+            'addressComponent' => function($model){ return $model->addressComponents; },
+            'countryName' => function($model){ return $model->country->country_name; },
+            'types' => function($model){ return $model->categories; },
+            'photos' => function($model){
+                $photos = [];
+                foreach($model->spotPhotos as $photo){
+                    $photos[] = $photo->url;
+                }
+                return $photos;
+            },
         ];
     }
     /**
@@ -86,6 +99,13 @@ class Spot extends \yii\db\ActiveRecord
     public function getAddressComponents()
     {
         return $this->hasMany(AddressComponent::className(), ['spots_id' => 'ss_spots_id']);
+    }
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSpotPhotos()
+    {
+        return $this->hasMany(SpotPhoto::className(), ['spot_id' => 'ss_spots_id']);
     }
 
 
@@ -96,6 +116,21 @@ class Spot extends \yii\db\ActiveRecord
     {
         return $this->hasMany(Category::className(), ['ID' => 'category_id'])->viaTable('ss_category_spots', ['spots_id' => 'ss_spots_id']);
     }
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSpotters()
+    {
+        return $this->hasMany(User::className(), ['id_user' => 'user_id'])->viaTable('ss_users_spots', ['spot_id' => 'ss_spots_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPlanners()
+    {
+        return $this->hasMany(User::className(), ['id_user' => 'user_id'])->viaTable('ss_users_spotlater', ['spot_id' => 'ss_spots_id']);
+    }
 
     /**
      * @return \yii\db\ActiveQuery
@@ -103,5 +138,25 @@ class Spot extends \yii\db\ActiveRecord
     public function getCountry()
     {
         return $this->hasOne(Country::className(), ['COUNTRY_CODE' => 'ss_country_code']);
+    }/**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSpotted()
+    {
+        foreach($this->spotters as $user){
+            if($user->getPrimaryKey() == Yii::$app->user->getId()){
+                return true;
+            }
+        }
+        return false;
+    }
+    public function getPlanned()
+    {
+        foreach($this->planners as $user){
+            if($user->getPrimaryKey() == Yii::$app->user->getId()){
+                return true;
+            }
+        }
+        return false;
     }
 }

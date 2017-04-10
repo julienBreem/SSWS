@@ -100,4 +100,15 @@ class UserController extends Controller
             return $model->getErrors();
         }
     }
+
+    public function actionSpots()
+    {
+        $userId = Yii::$app->getRequest()->getQueryParam('id');
+        if($userId){
+            $user = \app\models\User::findOne($userId);
+            return $user->spots;
+        } else {
+            throw new \yii\web\HttpException(400, 'There are no query string');
+        }
+    }
 }

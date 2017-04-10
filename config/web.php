@@ -47,7 +47,7 @@ $config = [
             'enablePrettyUrl' => true,
             'enableStrictParsing' => false,
             'showScriptName' => true,
-            'rules' => [
+            /*'rules' => [
                 [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => 'spot',
@@ -62,7 +62,7 @@ $config = [
                         'OPTIONS *' => 'options',
                     ],
                 ],
-            ],
+            ],*/
         ],
 
     ],

@@ -1,7 +1,7 @@
 <?php
 namespace app\controllers;
 
-use app\models\AddressComponentTypes;
+use app\models\Spot;
 use yii\data\ActiveDataProvider;
 use yii\filters\auth\HttpBearerAuth;
 use Yii;
@@ -36,7 +36,7 @@ class SpotController extends Controller
 
             $model = new $this->modelClass;
             $query = $model->find();
-            $query->joinWith(['addressComponent', 'country']);
+            $query->joinWith(['addressComponents', 'country']);
             $searchTerm = preg_replace("/[\s,;]+/",'%',$_GET['query']);
             $query->Where(" concat(name,'|',ss_address_component.long_name,'|',ss_countries.country_name) like '%".$searchTerm."%'");
             $query->limit(5);
@@ -81,10 +81,21 @@ class SpotController extends Controller
                 $addressComponent->long_name = $component->long_name;
                 $addressComponent->short_name = $component->short_name;
                 $addressComponent->type = $type->getPrimaryKey();
-                $addressComponent->spots_id = $model->ss_spots_id;
+                $addressComponent->spots_id = $model->getPrimaryKey();
                 if(!$addressComponent->save()){
                     $transaction->rollBack();
                     return $addressComponent->getErrors();
+
+                }
+            }
+
+            foreach($data->photos as $photoUrl){
+                $photo = new \app\models\SpotPhoto();
+                $photo->url = $photoUrl;
+                $photo->spot_id = $model->getPrimaryKey();
+                if(!$photo->save()){
+                    $transaction->rollBack();
+                    return $photo->getErrors();
 
                 }
             }
@@ -94,6 +105,18 @@ class SpotController extends Controller
             $transaction->rollBack();
             return $model->getErrors();
 
+        }
+    }
+
+    public function actionGetByGoogleId()
+    {
+        $googleId = Yii::$app->getRequest()->getQueryParam('googleId');
+        if($googleId){
+            return Spot::find()
+                ->where(['place_id' => $googleId])
+                ->one();
+        } else {
+            throw new \yii\web\HttpException(400, 'There are no query string');
         }
     }
 }
