@@ -57,6 +57,36 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
             'updated_at' => 'Updated At',
             'last_ip' => 'Last Ip',
             'last_login' => 'Last Login',
+            'picture' => 'picture',
+        ];
+    }
+
+    public function fields()
+    {
+        return[
+            'id_user' => 'id_user',
+            'access_token' => 'access_token',
+            'family_name' => 'family_name',
+            'given_name' => 'given_name',
+            'email' => 'email',
+            'picture' => 'picture',
+            'created_at' => 'created_at',
+            'updated_at' => 'updated_at',
+            'last_ip' => 'last_ip',
+            'last_login' => 'last_login',
+            'activeUser' => function($model){
+                if($model->getPrimaryKey() == Yii::$app->user->getId()){
+                    return true;
+                } else {
+                    return false;
+                }
+            },
+            'isFollower' => function($model){
+                return $model->isFollower();
+            },
+            'isFollowed' => function($model){
+                return $model->isFollowed();
+            },
         ];
     }
     /**
@@ -108,7 +138,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getIdentity()
+    public function getIdentities()
     {
         return $this->hasMany(Identity::className(), ['ss_user_id' => 'id_user']);
     }
@@ -116,5 +146,35 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     public function getSpots()
     {
         return $this->hasMany(Spot::className(), ['ss_spots_id' => 'spot_id'])->viaTable('ss_users_spots', ['user_id' => 'id_user']);
+    }
+
+    public function getFollowers()
+    {
+        return $this->hasMany(User::className(), ['id_user' => 'follower_id'])->viaTable('ss_followers', ['followed_id' => 'id_user']);
+    }
+
+    public function getFollowedList()
+    {
+        return $this->hasMany(User::className(), ['id_user' => 'followed_id'])->viaTable('ss_followers', ['follower_id' => 'id_user']);
+    }
+
+    public function isFollower()
+    {
+        foreach($this->followedList as $followed){
+            if($followed->getPrimaryKey() == Yii::$app->user->getId()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function isFollowed()
+    {
+        foreach($this->followers as $follower){
+            if($follower->getPrimaryKey() == Yii::$app->user->getId()){
+                return true;
+            }
+        }
+        return false;
     }
 }

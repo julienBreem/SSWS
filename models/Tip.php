@@ -13,8 +13,8 @@ use Yii;
  * @property string $content
  * @property string $date
  *
- * @property SsSpots $spot
- * @property SsUsers $user
+ * @property Spot $spot
+ * @property User $user
  */
 class Tip extends \yii\db\ActiveRecord
 {
@@ -32,12 +32,12 @@ class Tip extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'spot_id', 'content'], 'required'],
+            [[ 'spot_id', 'content'], 'required'],
             [['user_id', 'spot_id'], 'integer'],
             [['content'], 'string'],
             [['date'], 'safe'],
-            [['spot_id'], 'exist', 'skipOnError' => true, 'targetClass' => SsSpots::className(), 'targetAttribute' => ['spot_id' => 'ss_spots_id']],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => SsUsers::className(), 'targetAttribute' => ['user_id' => 'id_user']],
+            [['spot_id'], 'exist', 'skipOnError' => true, 'targetClass' => Spot::className(), 'targetAttribute' => ['spot_id' => 'ss_spots_id']],
+            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id_user']],
         ];
     }
 
@@ -55,12 +55,30 @@ class Tip extends \yii\db\ActiveRecord
         ];
     }
 
+    public function fields()
+    {
+        return [
+            'ss_tips_id' => 'ss_tips_id',
+            'user_id' => 'user_id',
+            'spot_id' => 'spot_id',
+            'content' => 'content',
+            'date' => 'date',
+            'author' => function($model){
+                return $model->user->given_name." ".$model->user->family_name;
+            },
+            'picture' => function($model){
+                return $model->user->picture;
+            },
+        ];
+    }
+
+
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getSpot()
     {
-        return $this->hasOne(SsSpots::className(), ['ss_spots_id' => 'spot_id']);
+        return $this->hasOne(Spot::className(), ['ss_spots_id' => 'spot_id']);
     }
 
     /**
@@ -68,6 +86,12 @@ class Tip extends \yii\db\ActiveRecord
      */
     public function getUser()
     {
-        return $this->hasOne(SsUsers::className(), ['id_user' => 'user_id']);
+        return $this->hasOne(User::className(), ['id_user' => 'user_id']);
+    }
+
+    public function beforeSave($insert) {
+        $this->user_id = Yii::$app->user->getId();
+        //$this->user_id = 99;
+        return parent::beforeSave($insert);
     }
 }

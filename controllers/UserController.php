@@ -9,21 +9,22 @@ use Yii;
 class UserController extends Controller
 {
     public $modelClass = 'app\models\User';
-/*
-   public function behaviors()
-   {
 
-       $behaviors = parent::behaviors();
-       if($_SERVER['REQUEST_METHOD']!='OPTIONS'){
+    public function behaviors()
+    {
+
+        $behaviors = parent::behaviors();
+        if($_SERVER['REQUEST_METHOD']!='OPTIONS'){
            //echo $_SERVER['REQUEST_METHOD'];exit;
            $behaviors['bearerAuth'] = [
                'class' => HttpBearerAuth::className(),
+               'except' => ['login','create','search'],
            ];
-       }
-       return $behaviors;
+        }
+        return $behaviors;
 
     }
-*/
+
     public function actions()
     {
         $actions = parent::actions();
@@ -110,5 +111,39 @@ class UserController extends Controller
         } else {
             throw new \yii\web\HttpException(400, 'There are no query string');
         }
+    }
+
+    public function actionFollow()
+    {
+
+        $followedId = Yii::$app->getRequest()->getQueryParam('id');
+        if($followedId){
+            $followed = \app\models\User::findOne($followedId);
+            $user = Yii::$app->user->getIdentity();
+            if($followed->isFollowed()){
+                if(\Yii::$app
+                    ->db
+                    ->createCommand()
+                    ->delete('ss_followers', ['follower_id' => $user->getId(), 'followed_id' => $followedId])
+                    ->execute()){ // DELETE LE LIEN
+                    return false;
+                } else {
+                    throw new \yii\web\HttpException(500, 'Deletion error');
+                    //return $spot->getErrors();
+                }
+            } else {
+                if($user->link('followedList',$followed)){
+                    return true;
+                } else {
+                    //throw new \yii\web\HttpException(500, 'Internal server error');
+                    return $user->getErrors();
+                }
+            }
+
+        } else {
+            throw new \yii\web\HttpException(400, 'There are no query string');
+        }
+
+
     }
 }
