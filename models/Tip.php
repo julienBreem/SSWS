@@ -67,7 +67,7 @@ class Tip extends \yii\db\ActiveRecord
                 return $model->user->given_name." ".$model->user->family_name;
             },
             'picture' => function($model){
-                return $model->user->picture;
+                return $model->user->getPicture();
             },
         ];
     }

@@ -78,6 +78,9 @@ class Spot extends \yii\db\ActiveRecord
             'spotted' => function($model){
                 return $model->spotted;
             },
+            'spotCount' => function($model){
+                return count($model->spotters);
+            },
             'planned' => function($model){
                 return $model->planned;
             },

@@ -69,7 +69,9 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
             'family_name' => 'family_name',
             'given_name' => 'given_name',
             'email' => 'email',
-            'picture' => 'picture',
+            'picture' => function($model){
+                return $model->getPicture();
+            },
             'created_at' => 'created_at',
             'updated_at' => 'updated_at',
             'last_ip' => 'last_ip',
@@ -176,5 +178,11 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
             }
         }
         return false;
+    }
+
+    public function getPicture()
+    {
+        if($this->picture == "") return "http://rogersfoodsafetyiot.com/wp-content/uploads/2016/09/User-450x450.jpg";
+        return $this->picture;
     }
 }
