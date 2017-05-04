@@ -86,6 +86,15 @@ class Spot extends \yii\db\ActiveRecord
             },
             'addressComponent' => function($model){ return $model->addressComponents; },
             'countryName' => function($model){ return $model->country->country_name; },
+            'cityName' => function($model){
+                foreach($model->addressComponents as $comp){
+                    if($comp->componentType->name == 'locality')return $comp->long_name;
+                }
+                foreach($model->addressComponents as $comp){
+                    if($comp->componentType->name == 'sublocality_level_1')return $comp->long_name;
+                }
+                return 'unknown';
+            },
             'types' => function($model){ return $model->categories; },
             'photos' => function($model){
                 $photos = [];
