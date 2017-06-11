@@ -37,7 +37,8 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return [
             [['access_token', 'family_name', 'given_name', 'created_at',], 'required'],
-            [['access_token', 'family_name', 'given_name', 'email'], 'string', 'max' => 255],
+            [['access_token', 'family_name', 'given_name', 'email','quote'], 'string', 'max' => 255],
+            [['livesIn','from','plan'], 'string', 'max' => 100],
             [['created_at', 'updated_at', 'last_ip', 'last_login'], 'string', 'max' => 50],
         ];
     }
@@ -65,17 +66,16 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return[
             'id_user' => 'id_user',
-            'access_token' => 'access_token',
             'family_name' => 'family_name',
             'given_name' => 'given_name',
             'email' => 'email',
+            'quote' => 'quote',
+            'livesIn' => 'livesIn',
+            'from' => 'from',
+            'plan' => 'plan',
             'picture' => function($model){
                 return $model->getPicture();
             },
-            'created_at' => 'created_at',
-            'updated_at' => 'updated_at',
-            'last_ip' => 'last_ip',
-            'last_login' => 'last_login',
             'activeUser' => function($model){
                 if($model->getPrimaryKey() == Yii::$app->user->getId()){
                     return true;
@@ -88,6 +88,15 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
             },
             'isFollowed' => function($model){
                 return $model->isFollowed();
+            },
+            'spotsCount' => function($model){
+                return count($model->spots);
+            },
+            'followersCount' => function($model){
+                return count($model->followers);
+            },
+            'followingCount' => function($model){
+                return count($model->followedList);
             },
         ];
     }
