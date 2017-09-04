@@ -192,6 +192,9 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     public function getPicture()
     {
         if($this->picture == "") return "http://rogersfoodsafetyiot.com/wp-content/uploads/2016/09/User-450x450.jpg";
+        if(filter_var($this->picture, FILTER_VALIDATE_URL) === FALSE){
+            return 'http://localhost/SSWS/web/images/'.$this->picture;
+        }
         return $this->picture;
     }
 }
