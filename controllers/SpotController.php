@@ -119,4 +119,16 @@ class SpotController extends Controller
             throw new \yii\web\HttpException(400, 'There are no query string');
         }
     }
+
+    public function actionGetByUserId()
+    {
+        $userId = Yii::$app->getRequest()->getQueryParam('id');
+        if($userId){
+            return Spot::find()
+                ->where(['user_id' => $userId])
+                ->all();
+        } else {
+            throw new \yii\web\HttpException(400, 'There are no query string');
+        }
+    }
 }
