@@ -122,11 +122,10 @@ class SpotController extends Controller
 
     public function actionGetByUserId()
     {
-        $userId = Yii::$app->getRequest()->getQueryParam('id');
+        $userId = Yii::$app->getRequest()->getQueryParam('userId');
         if($userId){
-            return Spot::find()
-                ->where(['user_id' => $userId])
-                ->all();
+            $user = \app\models\User::findOne($userId);
+            return $user->spots;
         } else {
             throw new \yii\web\HttpException(400, 'There are no query string');
         }
