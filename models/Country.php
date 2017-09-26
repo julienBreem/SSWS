@@ -10,6 +10,7 @@ use Yii;
  * @property integer $ID
  * @property string $COUNTRY_CODE
  * @property string $country_name
+ * @property string $image
  * @property string $NORTH
  * @property string $SOUTH
  * @property string $EAST
@@ -38,6 +39,7 @@ class Country extends \yii\db\ActiveRecord
             [['ID_GEONAME'], 'integer'],
             [['COUNTRY_CODE'], 'string', 'max' => 2],
             [['country_name'], 'string', 'max' => 45],
+            [['image'], 'string', 'max' => 100],
             [['NORTH', 'SOUTH', 'EAST', 'WEST'], 'string', 'max' => 30],
         ];
     }
@@ -56,6 +58,7 @@ class Country extends \yii\db\ActiveRecord
             'EAST' => 'East',
             'WEST' => 'West',
             'ID_GEONAME' => 'Id  Geoname',
+            'image' => 'image',
         ];
     }
 

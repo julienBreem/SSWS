@@ -85,7 +85,7 @@ class Spot extends \yii\db\ActiveRecord
                 return $model->planned;
             },
             'addressComponent' => function($model){ return $model->addressComponents; },
-            'countryName' => function($model){ return $model->country->country_name; },
+            'country' => function($model){ return $model->country; },
             'cityName' => function($model){
                 foreach($model->addressComponents as $comp){
                     if($comp->componentType->name == 'locality')return $comp->long_name;

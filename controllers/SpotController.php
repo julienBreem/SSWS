@@ -20,6 +20,7 @@ class SpotController extends Controller
                 'class' => HttpBearerAuth::className(),
             ];
         }
+
         return $behaviors;
     }
 

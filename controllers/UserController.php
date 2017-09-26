@@ -39,7 +39,7 @@ class UserController extends Controller
             $model = new $this->modelClass;
             $query = $model->find();
             $searchTerm = preg_replace("/[\s,;]+/",'%',$_GET['query']);
-            $query->Where(" concat(given_name,'|',family_name) like '%".$searchTerm."%'");
+            $query->Where("name like '%".$searchTerm."%'");
             $query->limit(5);
             //echo $query->createCommand()->rawSql;exit;
             try {
