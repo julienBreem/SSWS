@@ -39,7 +39,7 @@ class UserController extends Controller
             $model = new $this->modelClass;
             $query = $model->find();
             $searchTerm = preg_replace("/[\s,;]+/",'%',$_GET['query']);
-            $query->Where(" concat(given_name,'|',family_name) like '%".$searchTerm."%'");
+            $query->Where("name like '%".$searchTerm."%'");
             $query->limit(5);
             //echo $query->createCommand()->rawSql;exit;
             try {
@@ -76,6 +76,7 @@ class UserController extends Controller
         }
     }
 
+
     public function actionCreate()
     {
         $data = json_decode(file_get_contents('php://input'));
@@ -83,6 +84,24 @@ class UserController extends Controller
         foreach($data as $key => $value){
             if($model->hasAttribute($key))$model->setAttribute($key,$value);
         }
+
+        if (!empty($model->picture)) {
+            $temp = explode('.',$model->picture);
+            $ext = end($temp);
+            $temp = explode('?',$ext);
+            $cleanExt = reset($temp);
+            // generate a unique file name to prevent duplicate filenames
+            $picName = Yii::$app->security->generateRandomString().".{$cleanExt}";
+            // the path to save file, you can set an uploadPath
+            // in Yii::$app->params (as used in example below)
+            Yii::$app->params['uploadPath'] = Yii::$app->basePath . '/web/images/';
+            $path = Yii::$app->params['uploadPath'] . $picName;
+            if(copy($model->picture,$path)){
+                $model->picture = $picName;
+            }
+        }
+
+
         //return $data->identities;
         if($model->save()){
             $data->identities[0]->ss_user_id = $model->id_user;

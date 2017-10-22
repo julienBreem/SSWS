@@ -20,6 +20,7 @@ class SpotController extends Controller
                 'class' => HttpBearerAuth::className(),
             ];
         }
+
         return $behaviors;
     }
 
@@ -115,6 +116,17 @@ class SpotController extends Controller
             return Spot::find()
                 ->where(['place_id' => $googleId])
                 ->one();
+        } else {
+            throw new \yii\web\HttpException(400, 'There are no query string');
+        }
+    }
+
+    public function actionGetByUserId()
+    {
+        $userId = Yii::$app->getRequest()->getQueryParam('userId');
+        if($userId){
+            $user = \app\models\User::findOne($userId);
+            return $user->spots;
         } else {
             throw new \yii\web\HttpException(400, 'There are no query string');
         }

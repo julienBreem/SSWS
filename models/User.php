@@ -12,6 +12,7 @@ use yii\web\IdentityInterface;
  * @property string $access_token
  * @property string $family_name
  * @property string $given_name
+ * @property string $name
  * @property string $email
  * @property string $created_at
  * @property string $updated_at
@@ -36,8 +37,8 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['access_token', 'family_name', 'given_name', 'created_at',], 'required'],
-            [['access_token', 'family_name', 'given_name', 'email','quote'], 'string', 'max' => 255],
+            [['access_token', 'name', 'created_at',], 'required'],
+            [['access_token', 'name', 'email','quote'], 'string', 'max' => 255],
             [['livesIn','from','plan'], 'string', 'max' => 100],
             [['created_at', 'updated_at', 'last_ip', 'last_login'], 'string', 'max' => 50],
         ];
@@ -51,8 +52,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
         return [
             'id_user' => 'Id User',
             'access_token' => 'Access Token',
-            'family_name' => 'Family Name',
-            'given_name' => 'Given Name',
+            'name' => 'Name',
             'email' => 'Email',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
@@ -66,8 +66,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return[
             'id_user' => 'id_user',
-            'family_name' => 'family_name',
-            'given_name' => 'given_name',
+            'name' => 'name',
             'email' => 'email',
             'quote' => 'quote',
             'livesIn' => 'livesIn',
@@ -191,7 +190,13 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
 
     public function getPicture()
     {
-        if($this->picture == "") return "http://rogersfoodsafetyiot.com/wp-content/uploads/2016/09/User-450x450.jpg";
+        if($this->picture == ""){
+            $nameTab = explode(" ",$this->name);
+            return "https://cdn.auth0.com/avatars/".strtolower($nameTab[0][0].$nameTab[1][0]).".png";
+        }
+        if(filter_var($this->picture, FILTER_VALIDATE_URL) === FALSE){
+            return 'http://localhost/SSWS/web/images/'.$this->picture;
+        }
         return $this->picture;
     }
 }
