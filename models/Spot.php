@@ -156,6 +156,7 @@ class Spot extends \yii\db\ActiveRecord
     public function getSpotted()
     {
         foreach($this->spotters as $user){
+            return $user->getPrimaryKey() . ' ' .Yii::$app->user->getId() ;
             if($user->getPrimaryKey() == Yii::$app->user->getId()){
                 return true;
             }
