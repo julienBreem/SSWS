@@ -140,24 +140,11 @@ class UserController extends Controller
             $followed = \app\models\User::findOne($followedId);
             $user = Yii::$app->user->getIdentity();
             if ($followed->isFollowed()) {
-                if (\Yii::$app
-                    ->db
-                    ->createCommand()
-                    ->delete('ss_followers', ['follower_id' => $user->getId(), 'followed_id' => $followedId])
-                    ->execute()
-                ) { // DELETE LE LIEN
-                    return false;
-                } else {
-                    throw new \yii\web\HttpException(500, 'Deletion error');
-                    //return $spot->getErrors();
-                }
+                $user->unlink('followedList', $followed,true);
+                return false;
             } else {
-                if ($user->link('followedList', $followed)) {
-                    return true;
-                } else {
-                    //throw new \yii\web\HttpException(500, 'Internal server error');
-                    return $user->getErrors();
-                }
+                $user->link('followedList', $followed);
+                return true;
             }
 
         } else {

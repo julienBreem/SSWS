@@ -48,30 +48,11 @@ class ServiceController extends Controller
             $spot = Spot::findOne($spotId);
 
             if($spot->spotted){ // DEJA SPOTTED?
-                if(\Yii::$app
-                    ->db
-                    ->createCommand()
-                    ->delete('ss_users_spots', ['spot_id' => $spotId, 'user_id' => $userId])
-                    ->execute()){ // DELETE LE LIEN
-                    return false;
-                } else {
-                    throw new \yii\web\HttpException(500, 'Deletion error');
-                    //return $spot->getErrors();
-                }
+                $spot->unlink('spotters',$user);
+                return false;
             } else { //SPOT
-                if($spot->link('spotters',$user)){
-                    if($spot->planned){ // PLANNED?
-                        \Yii::$app
-                            ->db
-                            ->createCommand()
-                            ->delete('ss_users_spotlater', ['spot_id' => $spotId, 'user_id' => $userId])
-                            ->execute(); // DELETE LE LIEN
-                    }
-                    return true;
-                } else {
-                    //throw new \yii\web\HttpException(500, 'Internal server error');
-                    return $spot->getErrors();
-                }
+                $spot->link('spotters',$user);
+                $spot->unlink('planners',$user,true);
             }
         } else {
             throw new \yii\web\HttpException(400, 'There are no query string');
@@ -86,23 +67,11 @@ class ServiceController extends Controller
             $spot = Spot::findOne($spotId);
 
             if($spot->planned){ // DEJA PLANNED?
-                if(\Yii::$app
-                    ->db
-                    ->createCommand()
-                    ->delete('ss_users_spotlater', ['spot_id' => $spotId, 'user_id' => $userId])
-                    ->execute()){ // DELETE LE LIEN
-                    return false;
-                } else {
-                    throw new \yii\web\HttpException(500, 'Deletion error');
-                    //return $spot->getErrors();
-                }
+                $spot->unlink('planners',$user);
+                return false;
             } else { //SPOT
-                if($spot->link('planners',$user)){
-                    return true;
-                } else {
-                    //throw new \yii\web\HttpException(500, 'Internal server error');
-                    return $spot->getErrors();
-                }
+                $spot->link('planners',$user,true);
+                return true;
             }
         } else {
             throw new \yii\web\HttpException(400, 'There are no query string');
