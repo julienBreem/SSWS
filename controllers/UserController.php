@@ -12,14 +12,14 @@ class UserController extends Controller
 
     public function behaviors()
     {
-
         $behaviors = parent::behaviors();
-        if($_SERVER['REQUEST_METHOD']!='OPTIONS'){
-           //echo $_SERVER['REQUEST_METHOD'];exit;
-           $behaviors['bearerAuth'] = [
-               'class' => HttpBearerAuth::className(),
-               'except' => ['login','create','search'],
-           ];
+
+        if ($_SERVER['REQUEST_METHOD'] != 'OPTIONS') {
+            //echo $_SERVER['REQUEST_METHOD'];exit;
+            $behaviors['bearerAuth'] = [
+                'class' => HttpBearerAuth::className(),
+                'except' => ['login', 'create', 'search'],
+            ];
         }
         return $behaviors;
 
@@ -38,8 +38,8 @@ class UserController extends Controller
 
             $model = new $this->modelClass;
             $query = $model->find();
-            $searchTerm = preg_replace("/[\s,;]+/",'%',$_GET['query']);
-            $query->Where("name like '%".$searchTerm."%'");
+            $searchTerm = preg_replace("/[\s,;]+/", '%', $_GET['query']);
+            $query->Where("name like '%" . $searchTerm . "%'");
             $query->limit(5);
             //echo $query->createCommand()->rawSql;exit;
             try {
@@ -64,12 +64,12 @@ class UserController extends Controller
     public function actionLogin()
     {
         $data = json_decode(file_get_contents('php://input'));
-        $model = Identity::findIdentityByIds($data->identities[0]->provider,$data->identities[0]->user_id)->user;
-        $model->setAttribute('access_token',$data->access_token);
-        $model->setAttribute('updated_at',$data->updated_at);
-        $model->setAttribute('last_ip',Yii::$app->request->getUserIP());
-        $model->setAttribute('last_login',date('Y-m-d H:i:s'));
-        if($model->save()){
+        $model = Identity::findIdentityByIds($data->identities[0]->provider, $data->identities[0]->user_id)->user;
+        $model->setAttribute('access_token', $data->access_token);
+        $model->setAttribute('updated_at', $data->updated_at);
+        $model->setAttribute('last_ip', Yii::$app->request->getUserIP());
+        $model->setAttribute('last_login', date('Y-m-d H:i:s'));
+        if ($model->save()) {
             return $model;
         } else {
             throw new HttpException(401, 'Bad request');
@@ -81,35 +81,35 @@ class UserController extends Controller
     {
         $data = json_decode(file_get_contents('php://input'));
         $model = new $this->modelClass();
-        foreach($data as $key => $value){
-            if($model->hasAttribute($key))$model->setAttribute($key,$value);
+        foreach ($data as $key => $value) {
+            if ($model->hasAttribute($key)) $model->setAttribute($key, $value);
         }
 
         if (!empty($model->picture)) {
-            $temp = explode('.',$model->picture);
+            $temp = explode('.', $model->picture);
             $ext = end($temp);
-            $temp = explode('?',$ext);
+            $temp = explode('?', $ext);
             $cleanExt = reset($temp);
             // generate a unique file name to prevent duplicate filenames
-            $picName = Yii::$app->security->generateRandomString().".{$cleanExt}";
+            $picName = Yii::$app->security->generateRandomString() . ".{$cleanExt}";
             // the path to save file, you can set an uploadPath
             // in Yii::$app->params (as used in example below)
             Yii::$app->params['uploadPath'] = Yii::$app->basePath . '/web/images/';
             $path = Yii::$app->params['uploadPath'] . $picName;
-            if(copy($model->picture,$path)){
+            if (copy($model->picture, $path)) {
                 $model->picture = $picName;
             }
         }
 
 
         //return $data->identities;
-        if($model->save()){
+        if ($model->save()) {
             $data->identities[0]->ss_user_id = $model->id_user;
             $identity = new Identity();
-            foreach($data->identities[0] as $key => $value){
-                if($identity->hasAttribute($key))$identity->setAttribute($key,$value);
+            foreach ($data->identities[0] as $key => $value) {
+                if ($identity->hasAttribute($key)) $identity->setAttribute($key, $value);
             }
-            if($identity->save()){
+            if ($identity->save()) {
                 return $model;
             } else {
                 header("HTTP/1.1 400 Bad Request");
@@ -124,7 +124,7 @@ class UserController extends Controller
     public function actionSpots()
     {
         $userId = Yii::$app->getRequest()->getQueryParam('id');
-        if($userId){
+        if ($userId) {
             $user = \app\models\User::findOne($userId);
             return $user->spots;
         } else {
@@ -136,22 +136,23 @@ class UserController extends Controller
     {
 
         $followedId = Yii::$app->getRequest()->getQueryParam('id');
-        if($followedId){
+        if ($followedId) {
             $followed = \app\models\User::findOne($followedId);
             $user = Yii::$app->user->getIdentity();
-            if($followed->isFollowed()){
-                if(\Yii::$app
+            if ($followed->isFollowed()) {
+                if (\Yii::$app
                     ->db
                     ->createCommand()
                     ->delete('ss_followers', ['follower_id' => $user->getId(), 'followed_id' => $followedId])
-                    ->execute()){ // DELETE LE LIEN
+                    ->execute()
+                ) { // DELETE LE LIEN
                     return false;
                 } else {
                     throw new \yii\web\HttpException(500, 'Deletion error');
                     //return $spot->getErrors();
                 }
             } else {
-                if($user->link('followedList',$followed)){
+                if ($user->link('followedList', $followed)) {
                     return true;
                 } else {
                     //throw new \yii\web\HttpException(500, 'Internal server error');

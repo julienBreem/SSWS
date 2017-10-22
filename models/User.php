@@ -195,7 +195,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
             return "https://cdn.auth0.com/avatars/".strtolower($nameTab[0][0].$nameTab[1][0]).".png";
         }
         if(filter_var($this->picture, FILTER_VALIDATE_URL) === FALSE){
-            return 'http://localhost/SSWS/web/images/'.$this->picture;
+            return 'http://julienbreem.be/SSWS/web/images/'.$this->picture;
         }
         return $this->picture;
     }

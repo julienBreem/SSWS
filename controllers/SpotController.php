@@ -14,7 +14,7 @@ class SpotController extends Controller
     {
         $behaviors = parent::behaviors();
 
-        if($_SERVER['REQUEST_METHOD']!='OPTIONS'){
+        if ($_SERVER['REQUEST_METHOD'] != 'OPTIONS') {
             //echo $_SERVER['REQUEST_METHOD'];exit;
             $behaviors['bearerAuth'] = [
                 'class' => HttpBearerAuth::className(),
@@ -38,8 +38,8 @@ class SpotController extends Controller
             $model = new $this->modelClass;
             $query = $model->find();
             $query->joinWith(['addressComponents', 'country']);
-            $searchTerm = preg_replace("/[\s,;]+/",'%',$_GET['query']);
-            $query->Where(" concat(name,'|',ss_address_component.long_name,'|',ss_countries.country_name) like '%".$searchTerm."%'");
+            $searchTerm = preg_replace("/[\s,;]+/", '%', $_GET['query']);
+            $query->Where(" concat(name,'|',ss_address_component.long_name,'|',ss_countries.country_name) like '%" . $searchTerm . "%'");
             $query->limit(5);
             //echo $query->createCommand()->rawSql;exit;
             try {
@@ -65,36 +65,36 @@ class SpotController extends Controller
     {
         $data = json_decode(file_get_contents('php://input'));
         $model = new $this->modelClass();
-        foreach($data as $key => $value){
-            if($model->hasAttribute($key))$model->setAttribute($key,$value);
+        foreach ($data as $key => $value) {
+            if ($model->hasAttribute($key)) $model->setAttribute($key, $value);
         }
         $transaction = Yii::$app->db->beginTransaction();
-        if($model->save()){
-            foreach($data->addressComponent as $component){
-                if(!\app\models\AddressComponentTypes::find()->where([ 'name' => $component->type])->exists()){
+        if ($model->save()) {
+            foreach ($data->addressComponent as $component) {
+                if (!\app\models\AddressComponentTypes::find()->where(['name' => $component->type])->exists()) {
                     $type = new \app\models\AddressComponentTypes();
                     $type->name = $component->type;
                     $type->save();
-                } else{
-                    $type = \app\models\AddressComponentTypes::find()->where([ 'name' => $component->type])->one();
+                } else {
+                    $type = \app\models\AddressComponentTypes::find()->where(['name' => $component->type])->one();
                 }
                 $addressComponent = new \app\models\AddressComponent();
                 $addressComponent->long_name = $component->long_name;
                 $addressComponent->short_name = $component->short_name;
                 $addressComponent->type = $type->getPrimaryKey();
                 $addressComponent->spots_id = $model->getPrimaryKey();
-                if(!$addressComponent->save()){
+                if (!$addressComponent->save()) {
                     $transaction->rollBack();
                     return $addressComponent->getErrors();
 
                 }
             }
 
-            foreach($data->photos as $photoUrl){
+            foreach ($data->photos as $photoUrl) {
                 $photo = new \app\models\SpotPhoto();
                 $photo->url = $photoUrl;
                 $photo->spot_id = $model->getPrimaryKey();
-                if(!$photo->save()){
+                if (!$photo->save()) {
                     $transaction->rollBack();
                     return $photo->getErrors();
 
@@ -112,7 +112,7 @@ class SpotController extends Controller
     public function actionGetByGoogleId()
     {
         $googleId = Yii::$app->getRequest()->getQueryParam('googleId');
-        if($googleId){
+        if ($googleId) {
             return Spot::find()
                 ->where(['place_id' => $googleId])
                 ->one();
@@ -124,7 +124,7 @@ class SpotController extends Controller
     public function actionGetByUserId()
     {
         $userId = Yii::$app->getRequest()->getQueryParam('userId');
-        if($userId){
+        if ($userId) {
             $user = \app\models\User::findOne($userId);
             return $user->spots;
         } else {

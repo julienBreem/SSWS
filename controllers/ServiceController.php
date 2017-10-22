@@ -12,20 +12,19 @@ class ServiceController extends Controller
 {
     public $modelClass = 'app\models\Spot';
 
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
 
-       public function behaviors()
-       {
-
-           $behaviors = parent::behaviors();
-           if($_SERVER['REQUEST_METHOD']!='OPTIONS'){
-               //echo $_SERVER['REQUEST_METHOD'];exit;
-               $behaviors['bearerAuth'] = [
-                   'class' => HttpBearerAuth::className(),
-               ];
-           }
-           return $behaviors;
-
+        if($_SERVER['REQUEST_METHOD']!='OPTIONS'){
+           //echo $_SERVER['REQUEST_METHOD'];exit;
+           $behaviors['bearerAuth'] = [
+               'class' => HttpBearerAuth::className(),
+           ];
         }
+
+        return $behaviors;
+    }
 
     public function actions()
     {
@@ -33,6 +32,11 @@ class ServiceController extends Controller
         //unset($actions['index']);
         //return $actions;
         return [];
+    }
+
+    public function actionTest()
+    {
+        return Yii::$app->user->getId();
     }
 
     public function actionSpot()
@@ -56,11 +60,13 @@ class ServiceController extends Controller
                 }
             } else { //SPOT
                 if($spot->link('spotters',$user)){
-                    \Yii::$app
-                        ->db
-                        ->createCommand()
-                        ->delete('ss_users_spotlater', ['spot_id' => $spotId, 'user_id' => $userId])
-                        ->execute();
+                    if($spot->planned){ // PLANNED?
+                        \Yii::$app
+                            ->db
+                            ->createCommand()
+                            ->delete('ss_users_spotlater', ['spot_id' => $spotId, 'user_id' => $userId])
+                            ->execute(); // DELETE LE LIEN
+                    }
                     return true;
                 } else {
                     //throw new \yii\web\HttpException(500, 'Internal server error');

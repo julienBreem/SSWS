@@ -3,7 +3,7 @@
 $params = require(__DIR__ . '/params.php');
 
 $config = [
-    'id' => 'basic',
+    'id' => 'bearer',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'components' => [
@@ -21,6 +21,10 @@ $config = [
             'identityClass' => 'app\models\User',
             'enableSession' => false,
             'loginUrl' => null,
+        ],
+        'spot' => [
+            'class' => 'app\models\Spot',
+            'enableSession' => false,
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
@@ -47,22 +51,6 @@ $config = [
             'enablePrettyUrl' => true,
             'enableStrictParsing' => false,
             'showScriptName' => true,
-            /*'rules' => [
-                [
-                    'class' => 'yii\rest\UrlRule',
-                    'controller' => 'spot',
-                    'extraPatterns' => [
-                        'OPTIONS create' => 'options',
-                    ],
-                ],
-                [
-                    'class' => 'yii\rest\UrlRule',
-                    'controller' => 'user',
-                    'extraPatterns' => [
-                        'OPTIONS *' => 'options',
-                    ],
-                ],
-            ],*/
         ],
 
     ],
