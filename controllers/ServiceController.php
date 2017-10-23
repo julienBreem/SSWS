@@ -47,13 +47,13 @@ class ServiceController extends Controller
             $user = User::findOne($userId);
             $spot = Spot::findOne($spotId);
 
-            if($spot->spotted){ // DEJA SPOTTED?
-                $spot->unlink('spotters',$user);
-                return false;
-            } else { //SPOT
+            if($spot->spotted){
+                $spot->unlink('spotters',$user,true);
+            } else {
                 $spot->link('spotters',$user);
                 $spot->unlink('planners',$user,true);
             }
+            return $spot;
         } else {
             throw new \yii\web\HttpException(400, 'There are no query string');
         }
@@ -66,13 +66,13 @@ class ServiceController extends Controller
             $user = User::findOne($userId);
             $spot = Spot::findOne($spotId);
 
-            if($spot->planned){ // DEJA PLANNED?
-                $spot->unlink('planners',$user);
-                return false;
-            } else { //SPOT
-                $spot->link('planners',$user,true);
-                return true;
+            if($spot->planned){
+                $spot->unlink('planners',$user,true);
+            } else {
+                $spot->link('planners',$user);
             }
+
+            return $spot;
         } else {
             throw new \yii\web\HttpException(400, 'There are no query string');
         }

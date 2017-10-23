@@ -8,7 +8,7 @@ use Yii;
  * This is the model class for table "ss_countries".
  *
  * @property integer $ID
- * @property string $COUNTRY_CODE
+ * @property string $country_code
  * @property string $country_name
  * @property string $image
  * @property string $NORTH
@@ -37,7 +37,7 @@ class Country extends \yii\db\ActiveRecord
     {
         return [
             [['ID_GEONAME'], 'integer'],
-            [['COUNTRY_CODE'], 'string', 'max' => 2],
+            [['country_code'], 'string', 'max' => 2],
             [['country_name'], 'string', 'max' => 45],
             [['image'], 'string', 'max' => 100],
             [['NORTH', 'SOUTH', 'EAST', 'WEST'], 'string', 'max' => 30],
@@ -51,7 +51,7 @@ class Country extends \yii\db\ActiveRecord
     {
         return [
             'ID' => 'ID',
-            'COUNTRY_CODE' => 'Country  Code',
+            'country_code' => 'Country  Code',
             'country_name' => 'Country Name',
             'NORTH' => 'North',
             'SOUTH' => 'South',

@@ -51,11 +51,7 @@ class UserController extends Controller
                 throw new \yii\web\HttpException(500, 'Internal server error');
             }
 
-            if ($provider->getCount() <= 0) {
-                throw new \yii\web\HttpException(404, 'No entries found with this query string');
-            } else {
-                return $provider;
-            }
+            return $provider;
         } else {
             throw new \yii\web\HttpException(400, 'There are no query string');
         }
