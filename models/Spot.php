@@ -16,10 +16,10 @@ use Yii;
  * @property string $url
  * @property string $international_phone_number
  *
- * @property SsAddressComponent[] $ssAddressComponents
- * @property SsCategorySpots[] $ssCategorySpots
- * @property SsCategory[] $categories
- * @property SsCountries $ssCountryCode
+ * @property AddressComponent[] $addressComponents
+ * @property CategorySpots[] $categorySpots
+ * @property Category[] $categories
+ * @property SsCountries $countryCode
  */
 class Spot extends \yii\db\ActiveRecord
 {
@@ -171,5 +171,12 @@ class Spot extends \yii\db\ActiveRecord
             }
         }
         return false;
+    }
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUsersSpots()
+    {
+        return $this->hasMany(UsersSpots::className(), ['spot_id' => 'ss_spots_id']);
     }
 }

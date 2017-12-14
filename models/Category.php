@@ -5,13 +5,13 @@ namespace app\models;
 use Yii;
 
 /**
- * This is the model class for table "ss_category".
+ * This is the model class for table "{{%ss_category}}".
  *
  * @property integer $ID
  * @property string $category_name
  *
- * @property SsTagsCateg[] $ssTagsCategs
- * @property TblSpots[] $tblSpots
+ * @property SsCategorySpots[] $ssCategorySpots
+ * @property SsUsersSpots[] $spots
  */
 class Category extends \yii\db\ActiveRecord
 {
@@ -20,7 +20,7 @@ class Category extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'ss_category';
+        return '{{%ss_category}}';
     }
 
     /**
@@ -49,9 +49,9 @@ class Category extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getSsTagsCategs()
+    public function getSsCategorySpots()
     {
-        return $this->hasMany(SsTagsCateg::className(), ['category_name' => 'ID']);
+        return $this->hasMany(CategorySpots::className(), ['category_id' => 'ID']);
     }
 
     /**
@@ -59,6 +59,6 @@ class Category extends \yii\db\ActiveRecord
      */
     public function getSpots()
     {
-        return $this->hasMany(Spots::className(), ['category' => 'ID']);
+        return $this->hasMany(UsersSpots::className(), ['id' => 'spots_id'])->viaTable('{{%ss_category_spots}}', ['category_id' => 'ID']);
     }
 }
