@@ -13,14 +13,14 @@ class SpotController extends Controller
     public function behaviors()
     {
         $behaviors = parent::behaviors();
-
+/*
         if ($_SERVER['REQUEST_METHOD'] != 'OPTIONS') {
             //echo $_SERVER['REQUEST_METHOD'];exit;
             $behaviors['bearerAuth'] = [
                 'class' => HttpBearerAuth::className(),
             ];
         }
-
+*/
         return $behaviors;
     }
 

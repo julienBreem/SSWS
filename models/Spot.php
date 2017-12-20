@@ -63,9 +63,10 @@ class Spot extends \yii\db\ActiveRecord
             'international_phone_number' => 'International Phone Number',
         ];
     }
+
     public function fields()
     {
-        return[
+        return [
             'ss_spots_id' => 'ss_spots_id',
             'ss_country_code' => 'ss_country_code',
             'place_id' => 'place_id',
@@ -74,38 +75,52 @@ class Spot extends \yii\db\ActiveRecord
             'lng' => 'lng',
             'name' => 'name',
             'url' => 'url',
-            'scope' => function(){ return "sharingSpots"; },
-            'spotted' => function($model){
+            'scope' => function () {
+                return "sharingSpots";
+            },
+            'spotted' => function ($model) {
                 return $model->spotted;
             },
-            'spotCount' => function($model){
+            'spotCount' => function ($model) {
                 return count($model->spotters);
             },
-            'planned' => function($model){
+            'planned' => function ($model) {
                 return $model->planned;
             },
-            'addressComponent' => function($model){ return $model->addressComponents; },
-            'countryName' => function($model){ return $model->country->country_name; },
-            'country' => function($model){ return $model->country; },
-            'cityName' => function($model){
-                foreach($model->addressComponents as $comp){
-                    if($comp->componentType->name == 'locality')return $comp->long_name;
+            'addressComponent' => function ($model) {
+                return $model->addressComponents;
+            },
+            'countryName' => function ($model) {
+                return $model->country->country_name;
+            },
+            'country' => function ($model) {
+                return $model->country;
+            },
+            'country' => function ($model) {
+                return $model->categories;
+            },
+            'cityName' => function ($model) {
+                foreach ($model->addressComponents as $comp) {
+                    if ($comp->componentType->name == 'locality') return $comp->long_name;
                 }
-                foreach($model->addressComponents as $comp){
-                    if($comp->componentType->name == 'sublocality_level_1')return $comp->long_name;
+                foreach ($model->addressComponents as $comp) {
+                    if ($comp->componentType->name == 'sublocality_level_1') return $comp->long_name;
                 }
                 return 'unknown';
             },
-            'types' => function($model){ return $model->categories; },
-            'photos' => function($model){
+            'types' => function ($model) {
+                return $model->categories;
+            },
+            'photos' => function ($model) {
                 $photos = [];
-                foreach($model->spotPhotos as $photo){
+                foreach ($model->spotPhotos as $photo) {
                     $photos[] = $photo->url;
                 }
                 return $photos;
             },
         ];
     }
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -113,6 +128,7 @@ class Spot extends \yii\db\ActiveRecord
     {
         return $this->hasMany(AddressComponent::className(), ['spots_id' => 'ss_spots_id']);
     }
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -127,8 +143,10 @@ class Spot extends \yii\db\ActiveRecord
      */
     public function getCategories()
     {
-        return $this->hasMany(Category::className(), ['ID' => 'category_id'])->viaTable('ss_category_spots', ['spots_id' => 'ss_spots_id']);
+        return $this->hasMany(Category::className(), ['ID' => 'category_id'])->viaTable('ss_category_spots', ['spots_id' => 'id'])
+            ->via('usersSpots');
     }
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -151,27 +169,31 @@ class Spot extends \yii\db\ActiveRecord
     public function getCountry()
     {
         return $this->hasOne(Country::className(), ['COUNTRY_CODE' => 'ss_country_code']);
-    }/**
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getSpotted()
     {
-        foreach($this->spotters as $user){
-            if($user->getPrimaryKey() == Yii::$app->user->getId()){
+        foreach ($this->spotters as $user) {
+            if ($user->getPrimaryKey() == Yii::$app->user->getId()) {
                 return true;
             }
         }
         return false;
     }
+
     public function getPlanned()
     {
-        foreach($this->planners as $user){
-            if($user->getPrimaryKey() == Yii::$app->user->getId()){
+        foreach ($this->planners as $user) {
+            if ($user->getPrimaryKey() == Yii::$app->user->getId()) {
                 return true;
             }
         }
         return false;
     }
+
     /**
      * @return \yii\db\ActiveQuery
      */
