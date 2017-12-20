@@ -96,9 +96,6 @@ class Spot extends \yii\db\ActiveRecord
             'country' => function ($model) {
                 return $model->country;
             },
-            'country' => function ($model) {
-                return $model->categories;
-            },
             'cityName' => function ($model) {
                 foreach ($model->addressComponents as $comp) {
                     if ($comp->componentType->name == 'locality') return $comp->long_name;
@@ -143,7 +140,7 @@ class Spot extends \yii\db\ActiveRecord
      */
     public function getCategories()
     {
-        return $this->hasMany(Category::className(), ['ID' => 'category_id'])->viaTable('ss_category_spots', ['spots_id' => 'id'])
+        return $this->hasMany(Category::className(), ['ID' => 'id'])->viaTable('ss_category_spots', ['spots_id' => 'id'])
             ->via('usersSpots');
     }
 
