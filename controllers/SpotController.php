@@ -131,4 +131,9 @@ class SpotController extends Controller
             throw new \yii\web\HttpException(400, 'There are no query string');
         }
     }
+
+    public function actionAddCategory()
+    {
+
+    }
 }

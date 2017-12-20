@@ -106,7 +106,26 @@ class Spot extends \yii\db\ActiveRecord
                 return 'unknown';
             },
             'types' => function ($model) {
-                return $model->categories;
+                $categories = [];
+                foreach ($model->usersSpots as $usersSpot) {
+                    foreach ($usersSpot->categories as $category) {
+                        if (!in_array($category->category_name, $categories)) {
+                            $categories[] = $category->category_name;
+                        }
+                    }
+                }
+                return $categories;
+            },
+            'tags' => function ($model) {
+                $tags = [];
+                foreach ($model->usersSpots as $usersSpot) {
+                    foreach ($usersSpot->tags as $tag) {
+                        if (!in_array($tag->tag_name, $tags)) {
+                            $tags[] = $tag->tag_name;
+                        }
+                    }
+                }
+                return $tags;
             },
             'photos' => function ($model) {
                 $photos = [];
@@ -132,16 +151,6 @@ class Spot extends \yii\db\ActiveRecord
     public function getSpotPhotos()
     {
         return $this->hasMany(SpotPhoto::className(), ['spot_id' => 'ss_spots_id']);
-    }
-
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getCategories()
-    {
-        return $this->hasMany(Category::className(), ['ID' => 'id'])->viaTable('ss_category_spots', ['spots_id' => 'id'])
-            ->via('usersSpots');
     }
 
     /**

@@ -12,10 +12,12 @@ use Yii;
  * @property integer $user_id
  * @property string $date
  *
- * @property SsCategorySpots[] $ssCategorySpots
- * @property SsCategory[] $categories
- * @property SsSpots $spot
- * @property SsUsers $user
+ * @property CategorySpots[] $CategorySpots
+ * @property Category[] $categories
+ * @property TagsSpots[] $TagsSpots
+ * @property Tag[] $tags
+ * @property Spot $spot
+ * @property User $user
  */
 class UsersSpots extends \yii\db\ActiveRecord
 {
@@ -36,8 +38,8 @@ class UsersSpots extends \yii\db\ActiveRecord
             [['spot_id', 'user_id'], 'required'],
             [['spot_id', 'user_id'], 'integer'],
             [['date'], 'safe'],
-            [['spot_id'], 'exist', 'skipOnError' => true, 'targetClass' => SsSpots::className(), 'targetAttribute' => ['spot_id' => 'ss_spots_id']],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => SsUsers::className(), 'targetAttribute' => ['user_id' => 'id_user']],
+            [['spot_id'], 'exist', 'skipOnError' => true, 'targetClass' => Spot::className(), 'targetAttribute' => ['spot_id' => 'ss_spots_id']],
+            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id_user']],
         ];
     }
 
@@ -57,14 +59,6 @@ class UsersSpots extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCategorySpots()
-    {
-        return $this->hasMany(CategorySpots::className(), ['spots_id' => 'id'])->inverseOf('spots');
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
     public function getCategories()
     {
         return $this->hasMany(Category::className(), ['ID' => 'category_id'])->viaTable('ss_category_spots', ['spots_id' => 'id']);
@@ -73,9 +67,17 @@ class UsersSpots extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getTags()
+    {
+        return $this->hasMany(Tag::className(), ['tag_id' => 'tag_id'])->viaTable('ss_tags_spots', ['users_spots_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getSpot()
     {
-        return $this->hasOne(SsSpots::className(), ['ss_spots_id' => 'spot_id'])->inverseOf('usersSpots');
+        return $this->hasOne(Spot::className(), ['ss_spots_id' => 'spot_id']);
     }
 
     /**
@@ -83,6 +85,6 @@ class UsersSpots extends \yii\db\ActiveRecord
      */
     public function getUser()
     {
-        return $this->hasOne(SsUsers::className(), ['id_user' => 'user_id'])->inverseOf('usersSpots');
+        return $this->hasOne(User::className(), ['id_user' => 'user_id']);
     }
 }
