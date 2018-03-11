@@ -1,10 +1,10 @@
 <?php
 namespace app\controllers;
 
-use app\models\Identity;
+use app\models\Category;
 use app\models\Spot;
 use app\models\User;
-use yii\data\ActiveDataProvider;
+use app\models\UsersSpots;
 use yii\filters\auth\HttpBearerAuth;
 use Yii;
 
@@ -34,14 +34,9 @@ class ServiceController extends Controller
         return [];
     }
 
-    public function actionTest()
-    {
-        return Yii::$app->user->getId();
-    }
-
     public function actionSpot()
     {
-        $spotId = Yii::$app->getRequest()->getQueryParam('spotId');
+        $spotId = Yii::$app->getRequest()->getBodyParam('spotId');
         if($spotId){
             $userId = Yii::$app->user->getId();
             $user = User::findOne($userId);
@@ -49,11 +44,29 @@ class ServiceController extends Controller
 
             if($spot->spotted){
                 $spot->unlink('spotters',$user,true);
+                return $spot;
             } else {
                 $spot->link('spotters',$user);
                 $spot->unlink('planners',$user,true);
             }
-            return $spot;
+            $categories = Yii::$app->getRequest()->getBodyParam('categories');
+
+            $usersSpots = UsersSpots::find()
+                ->where([
+                    'user_id' => $userId,
+                    'spot_id' => $spotId
+                ])
+                ->one();
+            foreach($categories as $categoryName){
+                $category = Category::find()
+                    ->where([
+                        'category_name' => $categoryName
+                    ])
+                    ->one();
+                $usersSpots->link('categories', $category);
+            }
+
+            return $usersSpots->spot;
         } else {
             throw new \yii\web\HttpException(400, 'There are no query string');
         }

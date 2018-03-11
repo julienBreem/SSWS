@@ -1,7 +1,10 @@
 <?php
+
 namespace app\controllers;
 
+use app\models\Category;
 use app\models\Spot;
+use app\models\UsersSpots;
 use yii\data\ActiveDataProvider;
 use yii\filters\auth\HttpBearerAuth;
 use Yii;
@@ -13,14 +16,14 @@ class SpotController extends Controller
     public function behaviors()
     {
         $behaviors = parent::behaviors();
-/*
-        if ($_SERVER['REQUEST_METHOD'] != 'OPTIONS') {
-            //echo $_SERVER['REQUEST_METHOD'];exit;
-            $behaviors['bearerAuth'] = [
-                'class' => HttpBearerAuth::className(),
-            ];
-        }
-*/
+
+                if ($_SERVER['REQUEST_METHOD'] != 'OPTIONS') {
+                    //echo $_SERVER['REQUEST_METHOD'];exit;
+                    $behaviors['bearerAuth'] = [
+                        'class' => HttpBearerAuth::className(),
+                    ];
+                }
+
         return $behaviors;
     }
 
@@ -132,8 +135,33 @@ class SpotController extends Controller
         }
     }
 
-    public function actionAddCategory()
+    public function actionGetPlansByUserId()
     {
+        $userId = Yii::$app->getRequest()->getQueryParam('userId');
+        if ($userId) {
+            $user = \app\models\User::findOne($userId);
+            return $user->plans;
+        } else {
+            throw new \yii\web\HttpException(400, 'There are no query string');
+        }
+    }
 
+    public function actionToggleCategory()
+    {
+        $usersSpots = UsersSpots::find()
+            ->where([
+                'user_id' => Yii::$app->user->getId(),
+                'spot_id' => Yii::$app->getRequest()->getQueryParam('spot_id')
+            ])
+            ->one();
+        $category = Category::findOne(Yii::$app->getRequest()->getQueryParam('category_id'));
+        foreach ($usersSpots->categories as $usersCategory) {
+            if ($usersCategory->ID == $category->ID) {
+                $usersSpots->unlink('categories', $category, true);
+                return Spot::findOne(Yii::$app->getRequest()->getQueryParam('spot_id'));
+            }
+        }
+        $usersSpots->link('categories', $category);
+        return Spot::findOne(Yii::$app->getRequest()->getQueryParam('spot_id'));
     }
 }

@@ -158,6 +158,11 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->hasMany(Spot::className(), ['ss_spots_id' => 'spot_id'])->viaTable('ss_users_spots', ['user_id' => 'id_user']);
     }
 
+    public function getPlans()
+    {
+        return $this->hasMany(Spot::className(), ['ss_spots_id' => 'spot_id'])->viaTable('ss_users_spotlater', ['user_id' => 'id_user']);
+    }
+
     public function getFollowers()
     {
         return $this->hasMany(User::className(), ['id_user' => 'follower_id'])->viaTable('ss_followers', ['followed_id' => 'id_user']);

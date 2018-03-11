@@ -9,9 +9,10 @@ use Yii;
  *
  * @property integer $tag_id
  * @property string $tag_name
- * @property integer $category_id
+ * @property integer $subcategory_id
  *
- * @property TagsSpots[] $tagsSpots
+ * @property TagSubcategory $subcategory
+ * @property Category[] $categories
  * @property UsersSpots[] $usersSpots
  */
 class Tag extends \yii\db\ActiveRecord
@@ -30,21 +31,21 @@ class Tag extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['tag_name', 'category_id'], 'required'],
+            [['tag_name', 'subcategory_id'], 'required'],
             [['tag_name'], 'string'],
-            [['category_id'], 'integer'],
+            [['subcategory_id'], 'integer'],
+            [['subcategory_id'], 'exist', 'skipOnError' => true, 'targetClass' => TagSubcategory::className(), 'targetAttribute' => ['subcategory_id' => 'tag_subcategory_id']],
         ];
     }
 
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
-    {
+    public function attributeLabels() {
         return [
             'tag_id' => 'Tag ID',
             'tag_name' => 'Tag Name',
-            'category_id' => 'Category ID',
+            'subcategory_id' => 'Subcategory ID',
         ];
     }
 
@@ -53,25 +54,28 @@ class Tag extends \yii\db\ActiveRecord
         return [
             'tag_id' => 'tag_id',
             'tag_name' => 'tag_name',
-            'category' => function ($model) {
-                return $model->category->category_name;
+            'subcategories' => function ($model) {
+                return $model->subcategory;
+            },
+            'categories' => function ($model) {
+                return $model->categories;
             },
         ];
+    }
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSubcategory()
+    {
+        return $this->hasOne(TagSubcategory::className(), ['tag_subcategory_id' => 'subcategory_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCategory()
+    public function getCategories()
     {
-        return $this->hasOne(Category::className(), ['ID' => 'category_id']);
-    }
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getTagsSpots()
-    {
-        return $this->hasMany(TagsSpots::className(), ['tag_id' => 'tag_id']);
+        return $this->hasMany(Category::className(), ['ID' => 'category_id'])->viaTable('ss_tags_category', ['tag_id' => 'tag_id']);
     }
 
     /**

@@ -1,10 +1,8 @@
 <?php
 namespace app\controllers;
 
-use app\models\Spot;
+use app\models\Tag;
 use yii\data\ActiveDataProvider;
-use yii\filters\auth\HttpBearerAuth;
-use Yii;
 
 class TagController extends Controller
 {
@@ -28,6 +26,18 @@ class TagController extends Controller
     public function actions()
     {
         $actions = parent::actions();
+        unset($actions['index']);
         return $actions;
+    }
+
+    public function actionIndex(){
+        $activeData = new ActiveDataProvider([
+            'query' => Tag::find(),
+            'pagination' => [
+                'defaultPageSize' => 0,
+                'pageSizeLimit' => [0, 50],
+            ],
+        ]);
+        return $activeData;
     }
 }
